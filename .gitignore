@@ -1,5 +1,4 @@
 /node_modules
 .vscode/
 package-lock.json
-app.js
 index2.html
