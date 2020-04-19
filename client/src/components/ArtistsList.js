@@ -20,7 +20,7 @@ class ArtistsList extends Component {
         "Ahmad Jamal",
         "Akon",
         "Al Green",
-        "Al Hirt/"
+        "Al Hirt"
       ],
     }
   }

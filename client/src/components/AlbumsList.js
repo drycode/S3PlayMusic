@@ -11,7 +11,7 @@ class AlbumsList extends Component {
   }
 
   handleClick(album) {
-    console.log(`${album} was clicked`);
+    this.props.onChange(album);
   }
 
   listAlbums() {
@@ -26,12 +26,10 @@ class AlbumsList extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    console.log(prevProps, prevState, this.state)
     if (prevProps !== this.props) {
       axios.get(`/artists/${this.props.selectedArtist}/albums`)
         .then(res => {
           this.setState({ albums: res.data })
-          console.log(res)
         })
         .catch(err => console.log(err));
     }

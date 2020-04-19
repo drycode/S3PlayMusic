@@ -1,9 +1,9 @@
-const AWS = require("aws-sdk")
+const AWS = require("aws-sdk");
 const config = require('./config');
 
 class S3Client {
   constructor() {
-    AWS.config.credentials = new AWS.SharedIniFileCredentials({ profile: 'tinas-imac-user' })
+    AWS.config.credentials = new AWS.SharedIniFileCredentials({ profile: 'laptop-admin-user' })
     this.client = new AWS.S3();
     this.artistNames = [];
     this.albumNames = [];
@@ -21,6 +21,7 @@ class S3Client {
         callback(err)
       }
       else {
+        this.artistNames = []
         for (let i in res.CommonPrefixes) {
           this.artistNames.push(res.CommonPrefixes[i].Prefix)
         }
@@ -31,7 +32,6 @@ class S3Client {
   }
 
   listAlbums(artistPath, callback) {
-    console.log(artistPath)
     let params = this.baseParams
     params.Prefix = artistPath + "/"
     this.client.listObjectsV2(params, (err, res) => {
@@ -39,13 +39,13 @@ class S3Client {
         callback(err)
       }
       else {
-        if (!this.albumNames.length) {
-          this.albumNames = []
-          res.CommonPrefixes.forEach(
-            (obj) => {
-              this.albumNames.push(obj.Prefix)
-            })
-        }
+        this.albumNames = []
+        res.CommonPrefixes.forEach(
+          (obj) => {
+            let albumName = obj.Prefix.split("/")
+            albumName = albumName[albumName.length - 2]
+            this.albumNames.push(albumName)
+          })
         callback(err, this.albumNames)
       }
     })
@@ -55,20 +55,25 @@ class S3Client {
     let params = this.baseParams
     params.Prefix = albumPath + "/"
     this.client.listObjectsV2(params, (err, res) => {
-      if (!this.songPaths.length) {
+      if (err) {
+        callback(err)
+      }
+      else {
         this.songPaths = []
         res.Contents.forEach(
           (obj) => {
-            this.songPaths.push(obj.Key)
+            let songName = obj.Key.split("/")
+            songName = songName[songName.length - 1]
+            if (songName) { this.songPaths.push(songName) }
           })
+        callback(err, this.songPaths)
       }
-      callback(this.songPaths)
     })
   }
 
   playMusic(songPath) {
-    let params = { Bucket: config.bucket }
-    params.Key = songPath;
+    let params = { Bucket: config.bucket, Key: songPath }
+    // params.Key = "Ahmad Jamal/Ahmad's Blues/02 It Could Happen to You.mp3";
     return this.client.getObject(params).createReadStream()
   }
 }

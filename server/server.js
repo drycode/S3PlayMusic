@@ -25,7 +25,6 @@ app.get('/artists', (req, res) => {
 
 app.get("/artists/:artist/albums", (req, res) => {
   s3.listAlbums(req.params.artist, (err, data) => {
-    console.log(data)
     if (err) {
       res.send(err)
     }
@@ -35,31 +34,46 @@ app.get("/artists/:artist/albums", (req, res) => {
 
 app.get("/artists/:artist/albums/:album/songs", (req, res) => {
   let albumPath = `${req.params.artist}/${req.params.album}`
-  s3.listSongs(albumPath, (data) => {
-    res.send(data)
+  s3.listSongs(albumPath, (err, data) => {
+    if (err) {
+      res.send(err)
+    }
+    else { res.send(data) }
   })
 })
 
+
 app.get("/artists/:artist/albums/:album/songs/:song/play", (req, res) => {
-  res.set('content-type', 'audio/mp3');
-  res.set('accept-ranges', 'bytes');
   songPath = `${req.params.artist}/${req.params.album}/${req.params.song}`
   let downloadStream = s3.playMusic(songPath);
+  console.log("Request initiated")
+  res.set('content-type', 'audio/mp3');
+  res.set('accept-ranges', 'bytes');
+
+  downloadStream.on('error', (err) => {
+    if (err.code === "NoSuchKey") {
+      let code = err.code
+      let message = err.message
+      console.log({ code, message, key: songPath })
+      setTimeout(() => {
+        downloadStream.emit('end');
+      }, 20);
+    }
+  });
 
   downloadStream.on('data', (chunk) => {
+    console.log(`${chunk.length} bytes of data`)
     res.write(chunk);
   });
 
-  downloadStream.on('error', () => {
-    res.sendStatus(404);
-  });
-
   downloadStream.on('end', () => {
+    console.log("Download Complete.")
     res.end();
   });
-  // downloadStream.pipe(res.send());
-}
-);
+
+
+
+});
 
 
 
