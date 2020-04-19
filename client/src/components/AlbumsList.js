@@ -6,7 +6,7 @@ class AlbumsList extends Component {
     super(props)
     this.state = {
       albums: [],
-      selectedArtist: this.props.name
+      selectedArtist: ""
     }
   }
 
@@ -25,17 +25,16 @@ class AlbumsList extends Component {
     );
   }
 
-  componentDidUpdate() {
-    console.log(this.props.name, this.state.selectedArtist)
-    if (!this.props.name == this.state.selectedArtist) {
-      axios.get(`/artists/${this.props.name}/albums`)
+  componentDidUpdate(prevProps, prevState) {
+    console.log(prevProps, prevState, this.state)
+    if (prevProps !== this.props) {
+      axios.get(`/artists/${this.props.selectedArtist}/albums`)
         .then(res => {
-          this.setState({ albums: res.data, selectedArtist: this.props.name })
+          this.setState({ albums: res.data })
           console.log(res)
         })
         .catch(err => console.log(err));
     }
-
   }
 
   render() {

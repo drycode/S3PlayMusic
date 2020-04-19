@@ -15,12 +15,21 @@ app.get('/test', (req, res) => {
 })
 
 app.get('/artists', (req, res) => {
-  s3.listArtists((data) => { res.send(data) })
+  s3.listArtists((err, data) => {
+    if (err) {
+      res.send(err)
+    }
+    else { res.send(data) }
+  })
 })
 
 app.get("/artists/:artist/albums", (req, res) => {
-  s3.listAlbums(req.params.artist, (data) => {
-    res.send(data)
+  s3.listAlbums(req.params.artist, (err, data) => {
+    console.log(data)
+    if (err) {
+      res.send(err)
+    }
+    else { res.send(data) }
   })
 })
 

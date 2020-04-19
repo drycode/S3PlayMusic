@@ -3,7 +3,7 @@ const config = require('./config');
 
 class S3Client {
   constructor() {
-    AWS.config.credentials = new AWS.SharedIniFileCredentials({ profile: 'laptop-admin-user' })
+    AWS.config.credentials = new AWS.SharedIniFileCredentials({ profile: 'tinas-imac-user' })
     this.client = new AWS.S3();
     this.artistNames = [];
     this.albumNames = [];
@@ -17,25 +17,37 @@ class S3Client {
 
   listArtists(callback) {
     this.client.listObjectsV2(this.baseParams, (err, res) => {
-      for (let i in res.CommonPrefixes) {
-        this.artistNames.push(res.CommonPrefixes[i].Prefix)
+      if (err) {
+        callback(err)
       }
-      callback(this.artistNames)
+      else {
+        for (let i in res.CommonPrefixes) {
+          this.artistNames.push(res.CommonPrefixes[i].Prefix)
+        }
+        callback(err, this.artistNames)
+      }
+
     })
   }
 
   listAlbums(artistPath, callback) {
+    console.log(artistPath)
     let params = this.baseParams
     params.Prefix = artistPath + "/"
     this.client.listObjectsV2(params, (err, res) => {
-      if (!this.albumNames.length) {
-        this.albumNames = []
-        res.CommonPrefixes.forEach(
-          (obj) => {
-            this.albumNames.push(obj.Prefix)
-          })
+      if (err) {
+        callback(err)
       }
-      callback(this.albumNames)
+      else {
+        if (!this.albumNames.length) {
+          this.albumNames = []
+          res.CommonPrefixes.forEach(
+            (obj) => {
+              this.albumNames.push(obj.Prefix)
+            })
+        }
+        callback(err, this.albumNames)
+      }
     })
   }
 
@@ -55,10 +67,11 @@ class S3Client {
   }
 
   playMusic(songPath) {
-    let params = {Bucket: config.bucket}
+    let params = { Bucket: config.bucket }
     params.Key = songPath;
     return this.client.getObject(params).createReadStream()
-}}
+  }
+}
 
 
 module.exports = new S3Client()

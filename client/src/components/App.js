@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import axios from 'axios'
+// import axios from 'axios'
 import Header from "./Header";
 import ArtistsList from "./ArtistsList"
 import AlbumsList from "./AlbumsList"
@@ -15,9 +15,9 @@ class App extends Component {
   handleChange(artist) {
     this.setState({ selectedArtist: artist });
   }
+
   render() {
     const selectedArtist = this.state.selectedArtist
-    console.log(selectedArtist)
     return (
       <div>
         <Header />

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import axios from 'axios'
+// import axios from 'axios'
 
 class ArtistsList extends Component {
 
@@ -25,13 +25,11 @@ class ArtistsList extends Component {
     }
   }
   handleClick(artist) {
-    console.log(`${artist} was clicked`);
     this.props.onChange(artist)
   }
 
 
-  listArtists(props) {
-    console.log(props)
+  listArtists() {
     const listArtists = this.state.artists.map((artist) =>
       <li key={artist} onClick={() => this.handleClick(artist)} >
         {artist}
