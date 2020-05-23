@@ -1,0 +1,7 @@
+.artists-container {
+    height: 1000px;
+    overflow: scroll;
+}
+.list-group-item {
+    margin: 10px;
+}

@@ -44,8 +44,6 @@ class App extends Component {
     return (
       <div>
         <Header selectedArtist={selectedArtist} onBack={this.rerenderComponents} />
-        <Player selectedArtist={selectedArtist}
-          selectedAlbum={selectedAlbum} selectedSong={selectedSong} />
         <ArtistsList selectedArtist={selectedArtist} onChange={this.updateArtist} />
         <AlbumsList selectedArtist={selectedArtist} selectedAlbum={selectedAlbum} onChange={this.updateAlbum} />
         <SongsList
@@ -53,6 +51,11 @@ class App extends Component {
           selectedAlbum={selectedAlbum}
           onChange={this.updateSong}
           showComponent={showSongList}
+        />
+        <Player
+          selectedArtist={selectedArtist}
+          selectedAlbum={selectedAlbum}
+          selectedSong={selectedSong}
         />
       </div>
     );
