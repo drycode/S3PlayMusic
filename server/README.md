@@ -1,3 +1,9 @@
+## Running the server
+```
+~ npm start
+```
+
+
 controllers/ — defines your app routes and their logic. You main route might be index.js but you might also have a route called for example ‘/user’ so you might want to make a JS file that just handles that.
 
 helpers/ — code and functionality to be shared by different parts of the project
