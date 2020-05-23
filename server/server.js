@@ -62,7 +62,6 @@ app.get("/artists/:artist/albums/:album/songs/:song/play", (req, res) => {
   });
 
   downloadStream.on('data', (chunk) => {
-    console.log(`${chunk.length} bytes of data`)
     res.write(chunk);
   });
 

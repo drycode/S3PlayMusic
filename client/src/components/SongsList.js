@@ -8,7 +8,8 @@ class SongsList extends Component {
       songs: [],
       selectedAlbum: "",
       selectedArtist: "",
-      selectedSong: ""
+      selectedSong: "",
+      showComponent: props.showComponent
     }
   }
 
@@ -35,7 +36,6 @@ class SongsList extends Component {
   componentDidUpdate(prevProps, prevState) {
     if (prevProps !== this.props) {
       if (this.props.selectedArtist && this.props.selectedAlbum) {
-        // let selectedAlbum = this.props.selectedAlbum.replace(this.props.selectedArtist, "")
         this.setState(this.props)
         axios.get(`/artists/${this.props.selectedArtist}/albums/${this.props.selectedAlbum}/songs`)
           .then(res => {
@@ -43,17 +43,24 @@ class SongsList extends Component {
           })
           .catch(err => console.log(err));
       }
+      else {
+        this.setState({ songs: [], selectedArtist: null, selectedAlbum: null, showComponent: null })
+      }
     }
 
   }
 
   render() {
-    return (
-      <ul>
-        {this.listSongs()}
-      </ul>
-    );
+    if (this.state.showComponent) {
+      return (
+        <ul>
+          {this.listSongs()}
+        </ul>
+      );
+    }
+    return <></>
   }
 }
+
 
 export default SongsList;

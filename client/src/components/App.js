@@ -12,10 +12,18 @@ class App extends Component {
     this.updateArtist = this.updateArtist.bind(this);
     this.updateAlbum = this.updateAlbum.bind(this);
     this.updateSong = this.updateSong.bind(this);
+    this.rerenderComponents = this.rerenderComponents.bind(this);
     this.state = {
       selectedArtist: null,
       selectedAlbum: null,
       selectedSong: null
+    }
+  }
+  rerenderComponents() {
+    if (this.state.selectedArtist && this.state.selectedAlbum) {
+      this.setState({ selectedAlbum: null })
+    } else if (this.state.selectedArtist) {
+      this.setState({ selectedArtist: null })
     }
   }
   updateArtist(artist) {
@@ -32,17 +40,19 @@ class App extends Component {
     const selectedArtist = this.state.selectedArtist
     const selectedAlbum = this.state.selectedAlbum
     const selectedSong = this.state.selectedSong
+    const showSongList = this.state.selectedArtist && this.state.selectedAlbum
     return (
       <div>
-        <Header />
+        <Header selectedArtist={selectedArtist} onBack={this.rerenderComponents} />
         <Player selectedArtist={selectedArtist}
           selectedAlbum={selectedAlbum} selectedSong={selectedSong} />
         <ArtistsList selectedArtist={selectedArtist} onChange={this.updateArtist} />
-        <AlbumsList selectedArtist={selectedArtist} onChange={this.updateAlbum} />
+        <AlbumsList selectedArtist={selectedArtist} selectedAlbum={selectedAlbum} onChange={this.updateAlbum} />
         <SongsList
           selectedArtist={selectedArtist}
           selectedAlbum={selectedAlbum}
           onChange={this.updateSong}
+          showComponent={showSongList}
         />
       </div>
     );
