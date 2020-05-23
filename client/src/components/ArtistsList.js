@@ -1,59 +1,56 @@
 import React, { Component } from 'react';
-// import axios from 'axios'
+
+import axios from 'axios'
 
 class ArtistsList extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      artists: [
-        "1970",
-        "29th Street Saxophone Quartet",
-        "A Day to Remember",
-        "AC_DC",
-        "Abbey Lincoln",
-        "Adam Brodsky",
-        "Adam Sandler",
-        "Adelphi Saxophone Quartet",
-        "Aerosmith",
-        "Ahmad Jamal Trio",
-        "Ahmad Jamal",
-        "Akon",
-        "Al Green",
-        "Al Hirt"
-      ],
+      artists: [],
+      showComponent: true,
     }
   }
   handleClick(artist) {
     this.props.onChange(artist)
+    this.setState({ showComponent: false })
   }
 
 
   listArtists() {
     const listArtists = this.state.artists.map((artist) =>
-      <li key={artist} onClick={() => this.handleClick(artist)} >
-        {artist}
-      </li >
+      <div className="col-3">
+        <li className="list-group-item" id={artist} key={artist} onClick={() => this.handleClick(artist)} >
+          {artist}
+        </li >
+      </div>
     );
     return (
-      <ul>{listArtists}</ul>
+      <div className="artists-container">
+        <div id="artists-list" className="row" >{listArtists}</ div>
+      </div>
     );
   }
+
   componentDidMount() {
-    // axios.get("/artists")
-    //   .then(res => {
-    //     this.setState({ artists: res.data })
-    //     console.log(res)
-    //   })
-    //   .catch(err => console.log(err));
+    axios.get("/artists")
+      .then(res => {
+        this.setState({ artists: res.data })
+        console.log(res)
+      })
+      .catch(err => console.log(err));
   }
 
   render() {
-    return (
-      <ul>
-        {this.listArtists(this.props.name)}
-      </ul>
-    );
+    if (this.state.showComponent) {
+      return (
+        <ul>
+          {this.listArtists(this.props.name)}
+        </ul>
+      );
+    }
+    return <></>
+
   }
 }
 

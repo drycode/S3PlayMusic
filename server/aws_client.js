@@ -3,7 +3,7 @@ const config = require('./config');
 
 class S3Client {
   constructor() {
-    AWS.config.credentials = new AWS.SharedIniFileCredentials({ profile: 'laptop-admin-user' })
+    AWS.config.credentials = new AWS.SharedIniFileCredentials({ profile: config.profile })
     this.client = new AWS.S3();
     this.artistNames = [];
     this.albumNames = [];
@@ -21,9 +21,12 @@ class S3Client {
         callback(err)
       }
       else {
-        this.artistNames = []
-        for (let i in res.CommonPrefixes) {
-          this.artistNames.push(res.CommonPrefixes[i].Prefix)
+        if (this.artistNames.length == 0) {
+          console.log("S3 List Objects Call made: listing artists")
+          for (let i in res.CommonPrefixes) {
+            this.artistNames.push(res.CommonPrefixes[i].Prefix)
+          }
+
         }
         callback(err, this.artistNames)
       }
