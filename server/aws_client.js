@@ -49,6 +49,7 @@ class S3Client {
             albumName = albumName[albumName.length - 2]
             this.albumNames.push(albumName)
           })
+        console.log(`S3 List Objects Call made: listing ${artistPath} albums`)
         callback(err, this.albumNames)
       }
     })
