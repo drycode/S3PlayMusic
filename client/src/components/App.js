@@ -7,8 +7,8 @@ import SongsList from "./SongsList"
 import Player from "./Player"
 
 class App extends Component {
-  constructor(props) {
-    super(props)
+  constructor() {
+    super()
     this.updateArtist = this.updateArtist.bind(this);
     this.updateAlbum = this.updateAlbum.bind(this);
     this.updateSong = this.updateSong.bind(this);
@@ -19,19 +19,49 @@ class App extends Component {
       selectedSong: null
     }
   }
+
   rerenderComponents() {
-    if (this.state.selectedArtist && this.state.selectedAlbum) {
-      this.setState({ selectedAlbum: null })
-    } else if (this.state.selectedArtist) {
+    let selections = this.stateConditional();
+
+    if (selections === 1) {
       this.setState({ selectedArtist: null })
     }
+    if (selections === 2) {
+      this.setState({ selectedAlbum: null })
+    }
+    if (selections === 3) {
+      this.setState({ selectedSong: null })
+    }
   }
+  selections = 0;
+
+
+  // if (this.state.selectedArtist && this.state.selectedAlbum && this.state.selectedSong) {
+  //   this.setState({ selectedSong: null })
+  // } else if (this.state.selectedArtist && this.state.selectedAlbum) {
+  //   this.setState({ selectedAlbum: null })
+  // }
+  // this.setState({ selectedSong: null })
+
+
+  stateConditional() {
+    let i = 0;
+    for (let property in this.state) {
+      if (this.state[property]) {
+        i += 1
+      }
+    }
+    return i
+  }
+
   updateArtist(artist) {
     this.setState({ selectedArtist: artist });
   }
+
   updateAlbum(album) {
     this.setState({ selectedAlbum: album });
   }
+
   updateSong(song) {
     this.setState({ selectedSong: song });
   }
@@ -39,23 +69,20 @@ class App extends Component {
   render() {
     const selectedArtist = this.state.selectedArtist
     const selectedAlbum = this.state.selectedAlbum
-    const selectedSong = this.state.selectedSong
     const showSongList = this.state.selectedArtist && this.state.selectedAlbum
+
     return (
       <div>
-        <Header selectedArtist={selectedArtist} onBack={this.rerenderComponents} />
+        <Header {...this.state} onBack={this.rerenderComponents} />
         <ArtistsList selectedArtist={selectedArtist} onChange={this.updateArtist} />
         <AlbumsList selectedArtist={selectedArtist} selectedAlbum={selectedAlbum} onChange={this.updateAlbum} />
         <SongsList
-          selectedArtist={selectedArtist}
-          selectedAlbum={selectedAlbum}
+          {...this.state}
           onChange={this.updateSong}
           showComponent={showSongList}
         />
         <Player
-          selectedArtist={selectedArtist}
-          selectedAlbum={selectedAlbum}
-          selectedSong={selectedSong}
+          {...this.state}
         />
       </div>
     );

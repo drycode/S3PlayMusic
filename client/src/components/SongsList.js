@@ -1,9 +1,33 @@
-import React, { Component } from 'react';
+import React, { useState, Component } from 'react';
 import axios from 'axios';
 
+function SongListItem({ i, callback, song }) {
+  const [selected, setSelected] = useState(false);
+
+  let color = "black"
+  if (selected) {
+    color = "blue"
+  }
+  console.log()
+
+  return (
+    <li
+      key={i}
+      onClick={() => {
+        callback(i);
+        setSelected(true);
+      }}
+      color={color} >
+      {song}
+    </li >
+  )
+}
+
 class SongsList extends Component {
+
   constructor(props) {
     super(props)
+    this.handleClick = this.handleClick.bind(this)
     this.state = {
       songs: [],
       selectedAlbum: "",
@@ -13,9 +37,10 @@ class SongsList extends Component {
     }
   }
 
-  handleClick(song) {
-    this.props.onChange(song)
+  handleClick(index) {
+    this.props.onChange(this.state.songs[index])
   }
+
 
   listSongs() {
     // const songs = this.state.songs.slice(1)
@@ -23,18 +48,21 @@ class SongsList extends Component {
     // Strips the path prefix from the song name
     // songs.map((song) => songNames.push(song.replace(/^.*[\\\/]/, '')))
 
-    const songsList = this.state.songs.map((song) =>
-      <li key={song} onClick={() => this.handleClick(song)}>
-        {song}
-      </li>
-    );
+    const songsList = []
+
+    for (let i in this.state.songs) {
+      songsList.push(
+        <SongListItem key={i} i={i} song={this.state.songs[i]} callback={this.handleClick} />
+      )
+    }
     return (
-      <ul>{songsList}</ul>
+      <> {songsList}</ >
     );
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevProps !== this.props) {
+    console.log(prevProps, prevState)
+    if (prevProps.selectedAlbum !== this.props.selectedAlbum) {
       if (this.props.selectedArtist && this.props.selectedAlbum) {
         this.setState(this.props)
         axios.get(`/artists/${this.props.selectedArtist}/albums/${this.props.selectedAlbum}/songs`)
@@ -44,7 +72,7 @@ class SongsList extends Component {
           .catch(err => console.log(err));
       }
       else {
-        this.setState({ songs: [], selectedArtist: null, selectedAlbum: null, showComponent: null })
+        this.setState({ songs: [], selectedArtist: null, selectedAlbum: null, showComponent: false })
       }
     }
 

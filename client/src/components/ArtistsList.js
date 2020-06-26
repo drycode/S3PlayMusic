@@ -9,22 +9,22 @@ class ArtistsList extends Component {
     this.state = {
       artists: [],
       showComponent: true,
-      selectedArtist: props.selectedArtist
+      selectedArtist: this.props.selectedArtist
     }
   }
 
   handleClick(artist) {
     this.props.onChange(artist)
-    this.setState({ showComponent: false, selectedArtist: artist })
+    this.setState({ showComponent: false })
   }
 
   listArtists() {
-    const listArtists = this.state.artists.map((artist) =>
-      <div className="col-3">
-        <li className="list-group-item" onClick={() => this.handleClick(artist)} >
+    const listArtists = this.state.artists.map((artist, i = 1) =>
+      <div key={artist} className="col-3">
+        <li key={artist} className="list-group-item" onClick={() => this.handleClick(artist)} >
           {artist}
         </li >
-      </div>
+      </div >
     );
     return (
       <div className="artists-container">
@@ -34,7 +34,6 @@ class ArtistsList extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    console.log(this.props)
     if (this.state.selectedArtist !== this.props.selectedArtist) {
       this.setState({ selectedArtist: this.props.selectedArtist })
       if (!this.props.selectedArtist) {
@@ -48,7 +47,6 @@ class ArtistsList extends Component {
     axios.get("/artists")
       .then(res => {
         this.setState({ artists: res.data })
-        console.log(res)
       })
       .catch(err => console.log(err));
   }

@@ -6,6 +6,8 @@ class Header extends Component {
     super(props);
     this.state = {
       selectedArtist: this.props.selectedArtist,
+      selectedAlbum: this.props.selectedAlbum,
+      selectedSong: this.props.selectedSong,
     }
   }
 
@@ -13,8 +15,16 @@ class Header extends Component {
     return (
       <div>
         <div>
-          Header
-          SelectedArtist: {this.props.selectedArtist}
+          <h1>Header</h1>
+          <h5 className="selection-header">
+            SelectedArtist: {this.props.selectedArtist}
+          </h5>
+          <h5 className="selection-header">
+            SelectedAlbum: {this.props.selectedAlbum}
+          </h5>
+          <h5 className="selection-header">
+            Selected Song: {this.props.selectedSong}
+          </h5>
         </div>
         <button onClick={() => this.props.onBack()}>Back</button>
 
