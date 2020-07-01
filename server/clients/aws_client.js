@@ -1,5 +1,5 @@
 const AWS = require("aws-sdk");
-const config = require('./config');
+const config = require('../config');
 
 class S3Client {
   constructor() {
@@ -11,7 +11,6 @@ class S3Client {
     this.baseParams = {
       Bucket: config.bucket, /* required */
       Delimiter: '/',
-      // Prefix: 'STRING_VALUE',
     }
   }
 
@@ -37,11 +36,11 @@ class S3Client {
   listAlbums(artistPath, callback) {
     let params = this.baseParams
     params.Prefix = artistPath + "/"
-    this.client.listObjectsV2(params, (err, res) => {
-      if (err) {
-        callback(err)
-      }
-      else {
+    return new Promise((resolve, reject) => {
+      this.client.listObjectsV2(params, (err, res) => {
+        if (err) {
+          return reject(err)
+        }
         this.albumNames = []
         res.CommonPrefixes.forEach(
           (obj) => {
@@ -50,9 +49,10 @@ class S3Client {
             this.albumNames.push(albumName)
           })
         console.log(`S3 List Objects Call made: listing ${artistPath} albums`)
-        callback(err, this.albumNames)
-      }
+        resolve(this.albumNames)
+      })
     })
+
   }
 
   listSongs(albumPath, callback) {
@@ -77,7 +77,6 @@ class S3Client {
 
   playMusic(songPath) {
     let params = { Bucket: config.bucket, Key: songPath }
-    // params.Key = "Ahmad Jamal/Ahmad's Blues/02 It Could Happen to You.mp3";
     return this.client.getObject(params).createReadStream()
   }
 }
