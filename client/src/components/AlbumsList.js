@@ -14,14 +14,15 @@ class AlbumsList extends Component {
   }
 
   listAlbums() {
-    const listAlbums = this.state.albums.map((album) =>
-      <li key={album} onClick={() => this.handleClick(album)}>
+    const listAlbums = Object.keys(this.state.albums).map((album) =>
+      // TODO: Create an album card
+      <li key={this.state.albums[album].id} onClick={() => this.handleClick(album)}>
         {album}
+        <img className="albumArt" src={this.state.albums[album].images[0].resource_url} />
       </li>
+
     );
-    return (
-      <ul>{listAlbums}</ul>
-    );
+    return listAlbums
   }
 
   handleClick(selection) {
@@ -34,6 +35,7 @@ class AlbumsList extends Component {
       this.setState({ selectedArtist: this.props.selectedArtist })
       axios.get(`/artists/${this.props.selectedArtist}/albums`)
         .then(res => {
+          console.log(res.data)
           this.setState({ albums: res.data })
         })
         .catch(err => console.log(err));

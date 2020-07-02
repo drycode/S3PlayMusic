@@ -5,3 +5,8 @@
 .list-group-item {
     margin: 10px;
 }
+img.albumArt {
+    max-width: 150px;
+    max-height: 150px;
+
+}
