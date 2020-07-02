@@ -27,97 +27,38 @@ app.get('/artists', (req, res) => {
 
 })
 
+function unpackDetails(data, albumName, response) {
+  return new Promise((resolve, reject) => {
+    response[albumName] = data
+    console.log("Editing response object")
+    resolve(response)
+  })
+}
 
-
-app.get("/artists/:artist/albums", (req, res) => {
+app.get("/artists/:artist/albums", async (req, res) => {
   console.log("#############")
   const artistName = req.params.artist
   let response = {};
-  let s3Promise = s3.listAlbums(artistName)
-  let albumDetailsPromises = []
-  let endProm = []
 
-  s3Promise
-    .then((data) => {
-      data.map((album) => {
-        console.log(album)
-        // Build an Array of promises that will first fetch the albumId, then use
-        // that album id to fetch the details on the album
-        albumDetailsPromises.push(
-          discogs.getAlbumId(artistName, album).then(
-            ({ data }) => {
-              let masterId = data.results[0].id
-              let recordName = data.results[0].title
-              console.log(masterId, recordName)
+  let albums = await s3.listAlbums(artistName)
+  const promises = albums.map(async (album) => {
+    console.log(album)
+    let result = await discogs.getAlbumId(artistName, album)
+    console.log(result)
 
-              // Storing the album name as it appears in S3
-              return [album, discogs.getAlbumDetails(masterId)]
-            }
-          )
-        )
-      })
-    })
-    .then(() => {
-      // When all the albumIds have been fetched, there will still exist a promise in the 
-      // second index of each element in the albumDetailsPromises array
-      Promise.all(albumDetailsPromises)
-        .then((namedPromises) => {
-          console.log("we're here")
-          console.log(namedPromises)
-          namedPromises.map(
-            (album) => {
-              let albumName = album[0]
-              let albumDetailPromise = album[1]
-              // Resolving the albumDetailsPromise here, and storing the value on
-              // a response object that we intend to send as the express response
-              albumDetailPromise
-                .then(
-                  ({ data }) => {
-                    response[albumName] = data
-                    console.log("Editing response object")
-                  })
-                .catch(err => response[albumName] = err)
-            })
+    try {
+      let masterId = result.data.results[0].id
+      let tempRes = await discogs.getAlbumDetails(masterId)
+      return [album, tempRes.data]
+    } catch (error) {
+      return [album, { "msg": error.message }]
+    }
+  })
 
-        })
+  responses = await Promise.all(promises)
+  responses.map(data => { response[data[0]] = data[1] })
 
-
-    })
-    .then(() => {
-      Promise.all(endProm).then(res.send(response))
-    })
-    .catch((err) => console.log(err))
-
-
-
-
-  // s3Promise.then((data) => {
-  //   data.map((album) => {
-  //     console.log(album)
-  //     discogs.getAlbumId(artistName, album)
-  //       .then(({ data }) => {
-
-  //         let masterId = data.results[0].id
-  //         let recordName = data.results[0].title
-  //         console.log(masterId, recordName)
-  //         discogs.getAlbumDetails(masterId)
-  //           .then(({ data }) => {
-  //             response[album] = data
-  //             res.send(response)
-  //           })
-
-  //           .catch(err => {
-  //             response[album] = err.message
-  //             console.log(err.message)
-
-  //           })
-  //           .catch(err => console.log(err))
-  //       })
-  //       .catch(err => {
-  //         console.log(err)
-  //       })
-  //   });
-  // })
+  res.send(response)
 })
 
 
