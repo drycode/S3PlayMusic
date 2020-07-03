@@ -17,10 +17,10 @@ class Header extends Component {
         <div>
           <h1>Header</h1>
           <h5 className="selection-header">
-            SelectedArtist: {this.props.selectedArtist}
+            Selected Artist: {this.props.selectedArtist}
           </h5>
           <h5 className="selection-header">
-            SelectedAlbum: {this.props.selectedAlbum}
+            Selected Album: {this.props.selectedAlbum}
           </h5>
           <h5 className="selection-header">
             Selected Song: {this.props.selectedSong}

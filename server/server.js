@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const path = require('path');
 
-const s3 = require("./clients/aws_client")
+const s3 = require("./clients/aws_client.js")
 const bodyParser = require('body-parser');
 const discogs = require('./clients/discogs_client');
 
@@ -17,12 +17,15 @@ app.get('/test', (req, res) => {
   res.send({ express: "Hello from express" })
 })
 
-app.get('/artists', (req, res) => {
+app.get('/artists', async (req, res) => {
   s3.listArtists((err, data) => {
     if (err) {
       res.send(err)
     }
-    else { res.send(data) }
+    else {
+      res.send(data)
+      res.send(data)
+    }
   })
 
 })
@@ -36,16 +39,12 @@ function unpackDetails(data, albumName, response) {
 }
 
 app.get("/artists/:artist/albums", async (req, res) => {
-  console.log("#############")
   const artistName = req.params.artist
   let response = {};
 
   let albums = await s3.listAlbums(artistName)
   const promises = albums.map(async (album) => {
-    console.log(album)
     let result = await discogs.getAlbumId(artistName, album)
-    console.log(result)
-
     try {
       let masterId = result.data.results[0].id
       let tempRes = await discogs.getAlbumDetails(masterId)

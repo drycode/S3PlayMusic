@@ -1,5 +1,8 @@
+const nullArtist = require("./null_responses");
+
 const AWS = require("aws-sdk");
 const config = require('../config');
+
 
 class S3Client {
   constructor() {
@@ -12,6 +15,60 @@ class S3Client {
       Bucket: config.bucket, /* required */
       Delimiter: '/',
     }
+  }
+
+  /**
+   * Requests the artist information from the s3 cache
+   * @param {string} artistName The artistName, as it exists in the music files bucket 
+   * @param {*} cacheBucket The name of the bucket used for caching the DiscogsAPI response
+   */
+  async getArtistCache(artistName, cacheBucket = "discogs-api-cache") {
+    let params = {
+      Bucket: cacheBucket,
+      Prefix: `artists/${S3Client.normalizeArtistName(artistName)}`
+    }
+
+    return new Promise((resolve, reject) => {
+      try {
+        let key = `artists/${S3Client.normalizeArtistName(artistName)}`
+        this.client.getObject({ Bucket: cacheBucket, Key: key }, (err, res) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(JSON.parse(res.Body.toString("utf-8")))
+          }
+        })
+      } catch (err) {
+        if (err instanceof TypeError) {
+          resolve(nullArtist)
+        } else {
+          console.error(err)
+        }
+      }
+    })
+  }
+
+  /**
+   * 
+   * @param {string} artistName The artistName, as it exists in the music files bucket 
+   * @param {Object} jsonObj The jsonFile in object form to be pushed to s3
+   * @param {*} cacheBucket The name of the bucket used for caching the DiscogsAPI response 
+   */
+  putArtistCache(artistName, jsonObj, cacheBucket = "discogs-api-cache") {
+    const params = {
+      Bucket: cacheBucket,
+      Key: `artists/${S3Client.normalizeArtistName(artistName)}.json`,
+      Body: Buffer.from(JSON.stringify(jsonObj), "binary")
+    }
+
+    return new Promise((resolve, reject) => {
+      this.client.putObject(params, (err, res) => {
+        if (err) {
+          reject(err)
+        }
+        resolve(res)
+      })
+    })
   }
 
   listArtists(callback) {
@@ -79,7 +136,17 @@ class S3Client {
     let params = { Bucket: config.bucket, Key: songPath }
     return this.client.getObject(params).createReadStream()
   }
+
+  static normalizeArtistName(artistName) {
+    return artistName.replace(/ /g, "-").replace(/\//g, "")
+  }
 }
 
+const s3Client = new S3Client()
+// s3Client.putArtistCache("Led Zeppelin").then(res => console.log(res))
+// s3Client.getArtistCache("Led Zeppelin").then(res => {
+//   console.log(res)
+// })
 
-module.exports = new S3Client()
+
+module.exports = { s3Client, S3Client }
