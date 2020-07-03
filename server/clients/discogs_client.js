@@ -1,15 +1,16 @@
 const nullArtist = require("./null_responses")
 const fs = require("fs");
+const config = require("../config");
 const sleep = require("../helpers/utils")
 const axios = require("axios");
 const { s3Client, S3Client } = require("./aws_client")
 
-const accessKey = fs.readFileSync("/Users/danyoung/.discogs/credentials", "utf-8").split(" = ")[1].trim()
+const accessKey = fs.readFileSync(config.discogsAccessTokenPath, "utf-8").split(" = ")[1].trim()
 
 // axios.defaults.headers.common['Authorization'] = `Discogs token=${accessKey}`
 
 class DiscogsClient {
-  constructor(accessTokenPath = "/Users/danyoung/.discogs/credentials") {
+  constructor(accessTokenPath = config.discogsAccessTokenPath) {
     this.axios = axios
     this.accessKey = fs.readFileSync(accessTokenPath, "utf-8").split(" = ")[1].trim()
     this.axios.defaults.headers.common['Authorization'] = `Discogs token=${accessKey}`

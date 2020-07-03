@@ -19,7 +19,7 @@ class ArtistsList extends Component {
   }
 
   listArtists() {
-    const listArtists = this.state.artists.map((artist, i = 1) =>
+    const listArtists = Object.keys(this.state.artists).map((artist, i = 1) =>
       <div key={artist} className="col-3">
         <li key={artist} className="list-group-item" onClick={() => this.handleClick(artist)} >
           {artist}
@@ -46,6 +46,7 @@ class ArtistsList extends Component {
   componentDidMount() {
     axios.get("/artists")
       .then(res => {
+        console.log(res.data)
         this.setState({ artists: res.data })
       })
       .catch(err => console.log(err));

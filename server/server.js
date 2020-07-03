@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const path = require('path');
 
-const s3 = require("./clients/aws_client.js")
+const { s3Client } = require("./clients/aws_client.js")
 const bodyParser = require('body-parser');
 const discogs = require('./clients/discogs_client');
 
@@ -18,31 +18,32 @@ app.get('/test', (req, res) => {
 })
 
 app.get('/artists', async (req, res) => {
-  s3.listArtists((err, data) => {
-    if (err) {
-      res.send(err)
-    }
-    else {
-      res.send(data)
-      res.send(data)
-    }
+  let response = {}
+  let _;
+  let data = await s3Client.listArtists()
+  // const promises = data.map(async (artist) => {
+  const promises = data.slice(0, 10).map(async (artist) => {
+    return [artist, await s3Client.getArtistCache(artist)]
   })
+  responses = await Promise.all(promises)
+  responses.map(data => { response[data[0]] = data[1] })
 
+  res.send(response)
 })
 
-function unpackDetails(data, albumName, response) {
-  return new Promise((resolve, reject) => {
-    response[albumName] = data
-    console.log("Editing response object")
-    resolve(response)
-  })
-}
+// function unpackDetails(data, albumName, response) {
+//   return new Promise((resolve, reject) => {
+//     response[albumName] = data
+//     console.log("Editing response object")
+//     resolve(response)
+//   })
+// }
 
 app.get("/artists/:artist/albums", async (req, res) => {
   const artistName = req.params.artist
   let response = {};
 
-  let albums = await s3.listAlbums(artistName)
+  let albums = await s3Client.listAlbums(artistName)
   const promises = albums.map(async (album) => {
     let result = await discogs.getAlbumId(artistName, album)
     try {
@@ -64,7 +65,7 @@ app.get("/artists/:artist/albums", async (req, res) => {
 
 app.get("/artists/:artist/albums/:album/songs", (req, res) => {
   let albumPath = `${req.params.artist}/${req.params.album}`
-  s3.listSongs(albumPath, (err, data) => {
+  s3Client.listSongs(albumPath, (err, data) => {
     if (err) {
       res.send(err)
     }
@@ -75,7 +76,7 @@ app.get("/artists/:artist/albums/:album/songs", (req, res) => {
 
 app.get("/artists/:artist/albums/:album/songs/:song/play", (req, res) => {
   songPath = `${req.params.artist}/${req.params.album}/${req.params.song}`
-  let downloadStream = s3.playMusic(songPath);
+  let downloadStream = s3Client.playMusic(songPath);
   console.log("Request initiated")
   res.set('content-type', 'audio/mp3');
   res.set('accept-ranges', 'bytes');

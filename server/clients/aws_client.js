@@ -23,14 +23,9 @@ class S3Client {
    * @param {*} cacheBucket The name of the bucket used for caching the DiscogsAPI response
    */
   async getArtistCache(artistName, cacheBucket = "discogs-api-cache") {
-    let params = {
-      Bucket: cacheBucket,
-      Prefix: `artists/${S3Client.normalizeArtistName(artistName)}`
-    }
-
     return new Promise((resolve, reject) => {
       try {
-        let key = `artists/${S3Client.normalizeArtistName(artistName)}`
+        let key = `artists/${S3Client.normalizeArtistName(artistName)}.json`
         this.client.getObject({ Bucket: cacheBucket, Key: key }, (err, res) => {
           if (err) {
             reject(err)
@@ -42,7 +37,7 @@ class S3Client {
         if (err instanceof TypeError) {
           resolve(nullArtist)
         } else {
-          console.error(err)
+          console.error("err")
         }
       }
     })
@@ -71,26 +66,37 @@ class S3Client {
     })
   }
 
-  listArtists(callback) {
-    this.client.listObjectsV2(this.baseParams, (err, res) => {
-      if (err) {
-        callback(err)
-      }
-      else {
-        if (this.artistNames.length == 0) {
-          console.log("S3 List Objects Call made: listing artists")
-          for (let i in res.CommonPrefixes) {
-            this.artistNames.push(res.CommonPrefixes[i].Prefix)
-          }
-
+  /**
+   * Calls listObjects on the music bucket and parses a list of "artistNames"
+   */
+  listArtists() {
+    return new Promise((resolve, reject) => {
+      this.client.listObjectsV2(this.baseParams, (err, res) => {
+        if (err) {
+          reject(err)
         }
-        callback(err, this.artistNames)
-      }
+        else {
+          if (this.artistNames.length == 0) {
+            console.log("S3 List Objects Call made: listing artists")
+            for (let i in res.CommonPrefixes) {
+              this.artistNames.push(res.CommonPrefixes[i].Prefix)
+            }
 
+          }
+          resolve(this.artistNames)
+        }
+      }
+      )
     })
   }
 
-  listAlbums(artistPath, callback) {
+  /**
+   * Calls listObjects with an artistName prefix to compile a list of "albumNames" 
+   * for a particular artist
+   * @param {string} artistPath The artist prefix used to query albums in s3 by 
+   * a particular artis 
+   */
+  listAlbums(artistPath) {
     let params = this.baseParams
     params.Prefix = artistPath + "/"
     return new Promise((resolve, reject) => {
@@ -112,6 +118,13 @@ class S3Client {
 
   }
 
+  /**
+   * Calls listObjects with an artistName/albumName prefix to fetch songs for a given
+   * artist and album
+   * @param {string} albumPath The artistName/albumName path prefix to used to query 
+   * songs on a particular album
+   * @param {function} callback The function applied to the songs list that is returned from S3
+   */
   listSongs(albumPath, callback) {
     let params = this.baseParams
     params.Prefix = albumPath + "/"
@@ -132,11 +145,20 @@ class S3Client {
     })
   }
 
+  /**
+   * Returns a read stream object for an audio file. 
+   * @param {string} songPath The artistName/albumName/songName path prefix
+   * for fetching a specific audio file from S3
+   */
   playMusic(songPath) {
     let params = { Bucket: config.bucket, Key: songPath }
     return this.client.getObject(params).createReadStream()
   }
 
+  /**
+   * Normalizes the artist name string for more reliability in our caching file structure
+   * @param {string} artistName The name of an artist as seen in s3
+   */
   static normalizeArtistName(artistName) {
     return artistName.replace(/ /g, "-").replace(/\//g, "")
   }
