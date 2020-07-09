@@ -1,17 +1,18 @@
 const express = require('express');
 const app = express();
 const path = require('path');
-const pino = require("pino")
 const { nullAlbum } = require("./clients/null_responses.js")
 
 const { s3Client } = require("./clients/aws_client.js")
 const bodyParser = require('body-parser');
 const discogs = require('./clients/discogs_client');
+const cacheMiddleware = require("./helpers/cache.js")
 
 const logger = require("./lib/logger.js")
 const expressPino = require('express-pino-logger');
 const expressLogger = expressPino({ logger });
 
+const defaultCacheTTL = 100
 
 
 app.use(bodyParser.json(), expressLogger)
@@ -23,7 +24,7 @@ app.get('/test', (req, res) => {
   res.send({ express: "Hello from express" })
 })
 
-app.get('/artists', async (req, res) => {
+app.get('/artists', cacheMiddleware(defaultCacheTTL), async (req, res) => {
   let response = {}
   let _;
   let data = await s3Client.listArtists()
@@ -32,20 +33,19 @@ app.get('/artists', async (req, res) => {
     return [artist, await s3Client.getArtistCache(artist)]
   })
   responses = await Promise.all(promises)
-  responses.map(data => { response[data[0]] = data[1] })
+  responses.map(data => {
+    // TODO: Clean up
+    delete data[1].master_id
+    delete data[1].master_url
+    delete data[1].uri
+    response[data[0]] = data[1]
+  })
 
   res.send(response)
 })
 
-// function unpackDetails(data, albumName, response) {
-//   return new Promise((resolve, reject) => {
-//     response[albumName] = data
-//     console.log("Editing response object")
-//     resolve(response)
-//   })
-// }
 
-app.get("/artists/:artist/albums", async (req, res) => {
+app.get("/artists/:artist/albums", cacheMiddleware(defaultCacheTTL), async (req, res) => {
   const artistName = req.params.artist
   let response = {};
 
@@ -70,7 +70,7 @@ app.get("/artists/:artist/albums", async (req, res) => {
 
 
 
-app.get("/artists/:artist/albums/:album/songs", (req, res) => {
+app.get("/artists/:artist/albums/:album/songs", cacheMiddleware(defaultCacheTTL), (req, res) => {
   let albumPath = `${req.params.artist}/${req.params.album}`
   s3Client.listSongs(albumPath, (err, data) => {
     if (err) {
