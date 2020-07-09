@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 // import axios from 'axios'
-import Header from "./Header";
-import ArtistsList from "./ArtistsList"
-import AlbumsList from "./AlbumsList"
-import SongsList from "./SongsList"
-import Player from "./Player"
+import Header from "./Header.jsx";
+import ArtistsList from "./ArtistsList.jsx"
+import AlbumsList from "./AlbumsList.jsx"
+import SongsList from "./SongsList.jsx"
+import Player from "./Player.jsx"
 
 class App extends Component {
   constructor() {
