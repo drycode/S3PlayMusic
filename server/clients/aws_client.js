@@ -38,7 +38,7 @@ class S3Client {
         if (err instanceof TypeError) {
           resolve(nullArtist)
         } else {
-          console.error("err")
+          logger.error("Something went wrong in the artists cache call")
         }
       }
     })
@@ -103,6 +103,7 @@ class S3Client {
     return new Promise((resolve, reject) => {
       this.client.listObjectsV2(params, (err, res) => {
         if (err) {
+          logger.error(err)
           return reject(err)
         }
         this.albumNames = []
@@ -132,6 +133,7 @@ class S3Client {
     params.Prefix = albumPath + "/"
     this.client.listObjectsV2(params, (err, res) => {
       if (err) {
+        logger.error(err)
         callback(err)
       }
       else {

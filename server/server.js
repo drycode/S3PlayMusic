@@ -26,10 +26,12 @@ app.get('/test', (req, res) => {
 
 app.get('/artists', cacheMiddleware(defaultCacheTTL), async (req, res) => {
   let response = {}
-  let _;
+  let limit = parseInt(req.query.limit)
+  let page = parseInt(req.query.page)
   let data = await s3Client.listArtists()
+
   // const promises = data.map(async (artist) => {
-  const promises = data.slice(0, 10).map(async (artist) => {
+  const promises = data.slice(limit * page, limit * page + limit).map(async (artist) => {
     return [artist, await s3Client.getArtistCache(artist)]
   })
   responses = await Promise.all(promises)
