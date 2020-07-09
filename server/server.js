@@ -1,14 +1,20 @@
 const express = require('express');
 const app = express();
 const path = require('path');
+const pino = require("pino")
+const { nullAlbum } = require("./clients/null_responses.js")
 
 const { s3Client } = require("./clients/aws_client.js")
 const bodyParser = require('body-parser');
 const discogs = require('./clients/discogs_client');
 
+const logger = require("./lib/logger.js")
+const expressPino = require('express-pino-logger');
+const expressLogger = expressPino({ logger });
 
 
-app.use(bodyParser.json());
+
+app.use(bodyParser.json(), expressLogger)
 app.get('', (req, res) => {
   res.sendFile(path.join(__dirname + '/index.html'))
 })
@@ -51,13 +57,14 @@ app.get("/artists/:artist/albums", async (req, res) => {
       let tempRes = await discogs.getAlbumDetails(masterId)
       return [album, tempRes.data]
     } catch (error) {
-      return [album, { "msg": error.message }]
+      logger.error(error)
+      return [album, nullAlbum]
     }
   })
 
   responses = await Promise.all(promises)
   responses.map(data => { response[data[0]] = data[1] })
-
+  logger.debug(response)
   res.send(response)
 })
 

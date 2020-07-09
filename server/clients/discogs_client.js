@@ -4,6 +4,7 @@ const config = require("../config");
 const sleep = require("../helpers/utils")
 const axios = require("axios");
 const { s3Client, S3Client } = require("./aws_client")
+const logger = require("../lib/logger")
 
 const accessKey = fs.readFileSync(config.discogsAccessTokenPath, "utf-8").split(" = ")[1].trim()
 
@@ -35,6 +36,7 @@ class DiscogsClient {
       this.axios.get(`https://api.discogs.com/masters/${masterId}`)
         .then((data) => {
           resolve(data)
+          logger.debug(data)
         })
         .catch((err) => {
           reject(err)
@@ -61,13 +63,13 @@ async function updateArtistCache() {
 
       let details = await discogs.getArtistDetails(artists[i])
       if (details[0] === undefined) {
-        console.log(artists[i])
+        logger.debug(artists[i])
         details[0] = nullArtist
       }
       await sleep(2000)
       let artist = S3Client.normalizeArtistName(artists[i])
       res = await s3Client.putArtistCache(artist, details[0])
-      console.log(i, res)
+      logger.debug(i, res)
     }
   })
 

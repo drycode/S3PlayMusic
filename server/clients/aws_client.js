@@ -1,7 +1,8 @@
-const nullArtist = require("./null_responses");
+const { nullArtist } = require("./null_responses");
 
 const AWS = require("aws-sdk");
 const config = require('../config');
+const logger = require("../lib/logger")
 
 
 class S3Client {
@@ -77,7 +78,7 @@ class S3Client {
         }
         else {
           if (this.artistNames.length == 0) {
-            console.log("S3 List Objects Call made: listing artists")
+            logger.debug("S3 List Objects Call made: listing artists")
             for (let i in res.CommonPrefixes) {
               this.artistNames.push(res.CommonPrefixes[i].Prefix)
             }
@@ -113,6 +114,7 @@ class S3Client {
           })
         console.log(`S3 List Objects Call made: listing ${artistPath} albums`)
         resolve(this.albumNames)
+
       })
     })
 

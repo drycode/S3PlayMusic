@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon server.js"
+    "start": "LOG_LEVEL=debug nodemon server.js | ./node_modules/.bin/pino-pretty"
   },
   "author": "",
   "license": "ISC",
@@ -15,6 +15,11 @@
     "body-parser": "^1.19.0",
     "dotenv": "^8.2.0",
     "express": "^4.13.3",
-    "nodemon": "^2.0.2"
+    "express-pino-logger": "^5.0.0",
+    "nodemon": "^2.0.2",
+    "pino": "^6.3.2"
+  },
+  "devDependencies": {
+    "pino-pretty": "^4.0.0"
   }
 }
