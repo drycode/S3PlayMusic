@@ -26,7 +26,6 @@ class Album {
 
     const responses = await Promise.all(promises)
     responses.map(data => { response[data[0]] = data[1] })
-    // logger.debug(response)
     return response
   }
 }

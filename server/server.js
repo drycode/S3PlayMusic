@@ -13,9 +13,9 @@ const expressPino = require('express-pino-logger');
 const expressLogger = expressPino({ logger });
 const Artist = require("./models/artist.js");
 const Album = require('./models/album.js');
+const Song = require('./models/song.js');
 
 const defaultCacheTTL = 100
-
 
 app.use(bodyParser.json(), expressLogger)
 app.get('', (req, res) => {
@@ -32,7 +32,6 @@ app.get('/artists', cacheMiddleware(defaultCacheTTL), async (req, res) => {
   } else {
     response = await Artist.getAll()
   }
-
   res.send(response)
 })
 
@@ -44,49 +43,17 @@ app.get("/artists/:artist/albums", cacheMiddleware(defaultCacheTTL), async (req,
 
 
 
-app.get("/artists/:artist/albums/:album/songs", cacheMiddleware(defaultCacheTTL), (req, res) => {
+app.get("/artists/:artist/albums/:album/songs", cacheMiddleware(defaultCacheTTL), async (req, res) => {
   let albumPath = `${req.params.artist}/${req.params.album}`
-  s3Client.listSongs(albumPath, (err, data) => {
-    if (err) {
-      res.send(err)
-    }
-    else { res.send(data) }
-  })
+  response = await Song.getSongsByAlbum(albumPath)
+  res.send(response)
 })
 
 
 app.get("/artists/:artist/albums/:album/songs/:song/play", (req, res) => {
   songPath = `${req.params.artist}/${req.params.album}/${req.params.song}`
-  let downloadStream = s3Client.playMusic(songPath);
-  console.log("Request initiated")
-  res.set('content-type', 'audio/mp3');
-  res.set('accept-ranges', 'bytes');
-
-  downloadStream.on('error', (err) => {
-    if (err.code === "NoSuchKey") {
-      let code = err.code
-      let message = err.message
-      console.log({ code, message, key: songPath })
-      setTimeout(() => {
-        downloadStream.emit('end');
-      }, 20);
-    }
-  });
-
-  downloadStream.on('data', (chunk) => {
-    res.write(chunk);
-  });
-
-  downloadStream.on('end', () => {
-    console.log("Download Complete.")
-    res.end();
-  });
-
-
-
+  Song.downloadAudioFile(songPath, res)
 });
-
-
 
 app.listen(5000, function () {
   console.log('makin music on 5000');

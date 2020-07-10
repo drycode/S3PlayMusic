@@ -17,6 +17,7 @@ class Artist {
       delete data[1].master_id
       delete data[1].master_url
       delete data[1].uri
+      delete data[1].user_data
       response[data[0]] = data[1]
     })
     return response

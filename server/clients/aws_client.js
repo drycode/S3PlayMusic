@@ -34,14 +34,6 @@ class S3Client {
           resolve(JSON.parse(res.Body.toString("utf-8")))
         }
       })
-      // } catch (err) {
-      // TODO: Move this to the model
-      // if (err instanceof TypeError) {
-      //   resolve(nullArtist)
-      // } else {
-      //   logger.error("Something went wrong in the artists cache call")
-      // }
-      // }
     })
   }
 
@@ -102,10 +94,11 @@ class S3Client {
     let params = this.baseParams
     params.Prefix = artistPath + "/"
     return new Promise((resolve, reject) => {
+      logger.info(`S3 List Objects Call made: listing ${artistPath} albums`)
       this.client.listObjectsV2(params, (err, res) => {
         if (err) {
           logger.error(err)
-          return reject(err)
+          reject(err)
         }
         this.albumNames = []
         res.CommonPrefixes.forEach(
@@ -114,7 +107,6 @@ class S3Client {
             albumName = albumName[albumName.length - 2]
             this.albumNames.push(albumName)
           })
-        console.log(`S3 List Objects Call made: listing ${artistPath} albums`)
         resolve(this.albumNames)
 
       })
@@ -127,26 +119,28 @@ class S3Client {
    * artist and album
    * @param {string} albumPath The artistName/albumName path prefix to used to query 
    * songs on a particular album
-   * @param {function} callback The function applied to the songs list that is returned from S3
    */
-  listSongs(albumPath, callback) {
+  listSongs(albumPath) {
     let params = this.baseParams
     params.Prefix = albumPath + "/"
-    this.client.listObjectsV2(params, (err, res) => {
-      if (err) {
-        logger.error(err)
-        callback(err)
-      }
-      else {
-        this.songPaths = []
-        res.Contents.forEach(
-          (obj) => {
-            let songName = obj.Key.split("/")
-            songName = songName[songName.length - 1]
-            if (songName) { this.songPaths.push(songName) }
-          })
-        callback(err, this.songPaths)
-      }
+    return new Promise((resolve, reject) => {
+      this.client.listObjectsV2(params, (err, res) => {
+        if (err) {
+          logger.error(err)
+          reject(err)
+        }
+        else {
+          this.songPaths = []
+          res.Contents.forEach(
+            (obj) => {
+              let songName = obj.Key.split("/")
+              songName = songName[songName.length - 1]
+              if (songName) { this.songPaths.push(songName) }
+            }
+          )
+          resolve(this.songPaths)
+        }
+      })
     })
   }
 

@@ -1,6 +1,6 @@
 const CONFIG = {
 	bucket: "daniels-music",
-	profile: "laptop-admin-user",
+	profile: process.env.AWS_PROFILE_NAME,
 	discogsAccessTokenPath: "/Users/danyoung/.discogs/credentials"
 }
 
