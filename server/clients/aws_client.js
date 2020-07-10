@@ -1,4 +1,4 @@
-const { nullArtist } = require("./null_responses");
+// const { nullArtist } = require("../models/null_responses");
 
 const AWS = require("aws-sdk");
 const config = require('../config');
@@ -25,22 +25,23 @@ class S3Client {
    */
   async getArtistCache(artistName, cacheBucket = "discogs-api-cache") {
     return new Promise((resolve, reject) => {
-      try {
-        let key = `artists/${S3Client.normalizeArtistName(artistName)}.json`
-        this.client.getObject({ Bucket: cacheBucket, Key: key }, (err, res) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(JSON.parse(res.Body.toString("utf-8")))
-          }
-        })
-      } catch (err) {
-        if (err instanceof TypeError) {
-          resolve(nullArtist)
+      // try {
+      let key = `artists/${S3Client.normalizeArtistName(artistName)}.json`
+      this.client.getObject({ Bucket: cacheBucket, Key: key }, (err, res) => {
+        if (err) {
+          reject(err)
         } else {
-          logger.error("Something went wrong in the artists cache call")
+          resolve(JSON.parse(res.Body.toString("utf-8")))
         }
-      }
+      })
+      // } catch (err) {
+      // TODO: Move this to the model
+      // if (err instanceof TypeError) {
+      //   resolve(nullArtist)
+      // } else {
+      //   logger.error("Something went wrong in the artists cache call")
+      // }
+      // }
     })
   }
 

@@ -1,4 +1,4 @@
-const nullArtist = require("./null_responses")
+const nullArtist = require("../models/null_responses")
 const fs = require("fs");
 const config = require("../config");
 const sleep = require("../helpers/utils")
@@ -36,7 +36,7 @@ class DiscogsClient {
       this.axios.get(`https://api.discogs.com/masters/${masterId}`)
         .then((data) => {
           resolve(data)
-          logger.debug(data)
+          // logger.debug(data)
         })
         .catch((err) => {
           reject(err)
@@ -49,7 +49,7 @@ class DiscogsClient {
     if (data.results) {
       return data.results
     } else {
-      return nullArtist
+      return null
     }
   }
 }

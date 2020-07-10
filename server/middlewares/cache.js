@@ -2,7 +2,7 @@ const logger = require("../lib/logger.js")
 
 
 class ServerCache {
-  constructor(TTL = 30) {
+  constructor(TTL = 0) {
     this.data = {}
     this.TTL = TTL * 1000;
   }

@@ -1,16 +1,18 @@
 const express = require('express');
 const app = express();
 const path = require('path');
-const { nullAlbum } = require("./clients/null_responses.js")
+const { nullAlbum } = require("./models/null_responses.js")
 
 const { s3Client } = require("./clients/aws_client.js")
 const bodyParser = require('body-parser');
 const discogs = require('./clients/discogs_client');
-const cacheMiddleware = require("./helpers/cache.js")
+const cacheMiddleware = require("./middlewares/cache.js")
 
 const logger = require("./lib/logger.js")
 const expressPino = require('express-pino-logger');
 const expressLogger = expressPino({ logger });
+const Artist = require("./models/artist.js");
+const Album = require('./models/album.js');
 
 const defaultCacheTTL = 100
 
@@ -25,48 +27,18 @@ app.get('/test', (req, res) => {
 })
 
 app.get('/artists', cacheMiddleware(defaultCacheTTL), async (req, res) => {
-  let response = {}
-  let limit = parseInt(req.query.limit)
-  let page = parseInt(req.query.page)
-  let data = await s3Client.listArtists()
-
-  // const promises = data.map(async (artist) => {
-  const promises = data.slice(limit * page, limit * page + limit).map(async (artist) => {
-    return [artist, await s3Client.getArtistCache(artist)]
-  })
-  responses = await Promise.all(promises)
-  responses.map(data => {
-    // TODO: Clean up
-    delete data[1].master_id
-    delete data[1].master_url
-    delete data[1].uri
-    response[data[0]] = data[1]
-  })
+  if (req.query.limit & req.query.page) {
+    response = await Artist.getAll(parseInt(req.query.limit), parseInt(req.query.page))
+  } else {
+    response = await Artist.getAll()
+  }
 
   res.send(response)
 })
 
 
 app.get("/artists/:artist/albums", cacheMiddleware(defaultCacheTTL), async (req, res) => {
-  const artistName = req.params.artist
-  let response = {};
-
-  let albums = await s3Client.listAlbums(artistName)
-  const promises = albums.map(async (album) => {
-    let result = await discogs.getAlbumId(artistName, album)
-    try {
-      let masterId = result.data.results[0].id
-      let tempRes = await discogs.getAlbumDetails(masterId)
-      return [album, tempRes.data]
-    } catch (error) {
-      logger.error(error)
-      return [album, nullAlbum]
-    }
-  })
-
-  responses = await Promise.all(promises)
-  responses.map(data => { response[data[0]] = data[1] })
-  logger.debug(response)
+  response = await Album.getAlbumsByArtist(req.params.artist)
   res.send(response)
 })
 

@@ -44,7 +44,7 @@ class ArtistsList extends Component {
 
 
   componentDidMount() {
-    axios.get("/artists?limit=10&page=2")
+    axios.get("/artists")
       .then(res => {
         console.log(res.data)
         this.setState({ artists: res.data })
