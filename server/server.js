@@ -51,8 +51,7 @@ app.get("/artists/:artist/albums/:album/songs", cacheMiddleware(defaultCacheTTL)
 
 
 app.get("/artists/:artist/albums/:album/songs/:song/play", (req, res) => {
-  songPath = `${req.params.artist}/${req.params.album}/${req.params.song}`
-  Song.downloadAudioFile(songPath, res)
+  Song.downloadAudioFile(req.params.artist, req.params.album, req.params.song, res)
 });
 
 app.listen(5000, function () {

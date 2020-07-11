@@ -2,15 +2,23 @@ const { s3Client } = require("../clients/aws_client.js")
 const logger = require("../lib/logger.js")
 
 const { nullSong } = require("../models/null_responses.js")
+const songMap = require("../middlewares/normalize.js")
 
 
 class Song {
   async getSongsByAlbum(albumPath) {
-    const songs = await s3Client.listSongs(albumPath)
+    let songs = await s3Client.listSongs(albumPath)
+    for (let i = 0; i < songs.length; i++) {
+      const song = songs[i]
+      const normalizedSong = songMap.putSongTarget(song)
+      songs[i] = normalizedSong
+    }
     return songs
   }
 
-  async downloadAudioFile(songPath, res) {
+  async downloadAudioFile(artist, album, song, res) {
+    const songTarget = songMap.getSongTarget(song)
+    const songPath = `${artist}/${album}/${songTarget}`
     let downloadStream = s3Client.playMusic(songPath);
     logger.info("Request for song initiated")
     res.set('content-type', 'audio/mp3');

@@ -7,17 +7,19 @@ class SongMap {
     this.songMap = {}
   }
 
-  getSongName(songName) {
+  getSongTarget(songName) {
     const songTarget = this.songMap[songName]
     if (!songTarget) {
       logger.error("Invalid song name from client")
     }
+    return songTarget
   }
 
-  putSongName(songTarget) {
+  putSongTarget(songTarget) {
     const songName = normalizeSongName(songTarget)
     this.songMap[songName] = songTarget
     logger.debug(`${songName}:${songTarget} added to songMap.`)
+    return songName
   }
 }
 

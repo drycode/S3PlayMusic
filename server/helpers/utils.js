@@ -4,8 +4,6 @@ function sleep(ms) {
 
 function normalizeSongName(songTarget) {
   let songName = songTarget
-  //.split(".")[0]
-
   // (?<number>(?<=\b)\d+(?= )) # Matches number at the beginning of song name
   // (\.[A-z]{2,4}\d\b) # Matches extensions
   const number = songName.match(/(?<=\b)\d+ (?=)/g)
