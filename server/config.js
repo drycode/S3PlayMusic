@@ -1,11 +1,11 @@
-const dotenv = require("dotenv")
+const dotenv = require("dotenv");
 
-dotenv.config()
+dotenv.config();
 
 const CONFIG = {
-	bucket: "daniels-music",
-	profile: process.env.AWS_PROFILE_NAME,
-	discogsAccessTokenPath: process.env.DISCOGS_ACCESS_TOKEN_PATH
-}
+  bucket: "daniels-music",
+  profile: process.env.AWS_PROFILE_NAME,
+  discogsAccessTokenPath: process.env.DISCOGS_ACCESS_TOKEN_PATH,
+};
 
 module.exports = CONFIG;
