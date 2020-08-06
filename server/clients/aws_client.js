@@ -19,48 +19,6 @@ class S3Client {
   }
 
   /**
-   * Requests the artist information from the s3 cache
-   * @param {string} artistName The artistName, as it exists in the music files bucket 
-   * @param {*} cacheBucket The name of the bucket used for caching the DiscogsAPI response
-   */
-  async getArtistCache(artistName, cacheBucket = "discogs-api-cache") {
-    return new Promise((resolve, reject) => {
-      // try {
-      let key = `artists/${S3Client.normalizeArtistName(artistName)}.json`
-      this.client.getObject({ Bucket: cacheBucket, Key: key }, (err, res) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(JSON.parse(res.Body.toString("utf-8")))
-        }
-      })
-    })
-  }
-
-  /**
-   * 
-   * @param {string} artistName The artistName, as it exists in the music files bucket 
-   * @param {Object} jsonObj The jsonFile in object form to be pushed to s3
-   * @param {*} cacheBucket The name of the bucket used for caching the DiscogsAPI response 
-   */
-  putArtistCache(artistName, jsonObj, cacheBucket = "discogs-api-cache") {
-    const params = {
-      Bucket: cacheBucket,
-      Key: `artists/${S3Client.normalizeArtistName(artistName)}.json`,
-      Body: Buffer.from(JSON.stringify(jsonObj), "binary")
-    }
-
-    return new Promise((resolve, reject) => {
-      this.client.putObject(params, (err, res) => {
-        if (err) {
-          reject(err)
-        }
-        resolve(res)
-      })
-    })
-  }
-
-  /**
    * Calls listObjects on the music bucket and parses a list of "artistNames"
    */
   listArtists() {
@@ -153,6 +111,52 @@ class S3Client {
     let params = { Bucket: config.bucket, Key: songPath }
     return this.client.getObject(params).createReadStream()
   }
+
+  /**
+   * Requests the artist information from the s3 cache
+   * @param {string} artistName The artistName, as it exists in the music files bucket 
+   * @param {*} cacheBucket The name of the bucket used for caching the DiscogsAPI response
+   */
+  getArtistCache(artistName, cacheBucket = "discogs-api-cache") {
+    return new Promise((resolve, reject) => {
+      // try {
+      let key = `artists/${S3Client.normalizeArtistName(artistName)}.json`
+      this.client.getObject({ Bucket: cacheBucket, Key: key }, (err, res) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(JSON.parse(res.Body.toString("utf-8")))
+        }
+      })
+    })
+  }
+
+  /**
+   * 
+   * @param {string} artistName The artistName, as it exists in the music files bucket 
+   * @param {Object} jsonObj The jsonFile in object form to be pushed to s3
+   * @param {*} cacheBucket The name of the bucket used for caching the DiscogsAPI response 
+   */
+  putArtistCache(artistName, jsonObj, cacheBucket = "discogs-api-cache") {
+    const params = {
+      Bucket: cacheBucket,
+      Key: `artists/${S3Client.normalizeArtistName(artistName)}.json`,
+      Body: Buffer.from(JSON.stringify(jsonObj), "binary")
+    }
+
+    return new Promise((resolve, reject) => {
+      this.client.putObject(params, (err, res) => {
+        if (err) {
+          reject(err)
+        }
+        resolve({ status: 200 })
+      })
+    })
+  }
+
+
+
+
 
   /**
    * Normalizes the artist name string for more reliability in our caching file structure

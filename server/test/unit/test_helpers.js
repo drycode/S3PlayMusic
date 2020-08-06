@@ -1,8 +1,8 @@
 const assert = require("assert")
 
-const { normalizeSongName } = require("../helpers/utils")
+const { normalizeSongName } = require("../../helpers/utils")
 
-describe('tests', function () {
+describe('testHelpers', function () {
   describe("normalizeSongName", () => {
     beforeEach(() => {
       console.log("testing...")

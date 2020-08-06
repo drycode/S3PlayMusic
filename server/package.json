@@ -1,10 +1,10 @@
 {
-  "name": "s3Stream",
-  "version": "1.0.0",
+  "name": "s3-music-streaming-api",
+  "version": "0.0.3",
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha --recursive ",
     "start": "LOG_LEVEL=debug nodemon server.js | ./node_modules/.bin/pino-pretty"
   },
   "author": "",
@@ -17,7 +17,8 @@
     "express": "^4.13.3",
     "express-pino-logger": "^5.0.0",
     "nodemon": "^2.0.2",
-    "pino": "^6.3.2"
+    "pino": "^6.3.2",
+    "sinon": "^9.0.2"
   },
   "devDependencies": {
     "pino-pretty": "^4.0.0"
