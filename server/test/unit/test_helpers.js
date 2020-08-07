@@ -2,11 +2,8 @@ const assert = require("assert");
 
 const { normalizeSongName } = require("../../helpers/utils");
 
-describe("testHelpers", function () {
+describe("Test Helpers", function () {
   describe("normalizeSongName", () => {
-    beforeEach(() => {
-      console.log("testing...");
-    });
     it("Should return a normalized string", () => {
       assert.equal(normalizeSongName("Hello.mp3"), "Hello");
       assert.equal(normalizeSongName("04 New Monastery.mp3"), "New Monastery");

@@ -11,7 +11,7 @@ class Album {
     const promises = albums.map(async (album) => {
       let result = await discogs.getAlbumId(artistName, album);
       try {
-        let masterId = result.data.results[0].id;
+        let masterId = result;
         let tempRes = await discogs.getAlbumDetails(masterId);
         if (!tempRes) {
           return [album, nullAlbum];
